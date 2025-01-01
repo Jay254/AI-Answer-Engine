@@ -3,14 +3,14 @@
 import { useState } from "react";
 
 type Message = {
-  role: "user" | "ai";
+  role: "user" | "assistant";
   content: string;
 };
 
 export default function Home() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", content: "Hello! How can I help you today?" },
+    { role: "assistant", content: "Hello! How can I help you today?" },
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,14 +29,14 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, messages }),
       });
 
       // TODO: Handle the response from the chat API to display the AI response in the UI
       const data = await response.json();
-      // console.log("Response:", data);
+      console.log("Response:", data);
 
-      setMessages(prev => [...prev, { role: "ai", content: data.message }]);
+      setMessages(prev => [...prev, { role: "assistant", content: data.message }]);
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -62,14 +62,14 @@ export default function Home() {
             <div
               key={index}
               className={`flex gap-4 mb-4 ${
-                msg.role === "ai"
+                msg.role === "assistant"
                   ? "justify-start"
                   : "justify-end flex-row-reverse"
               }`}
             >
               <div
                 className={`px-4 py-2 rounded-2xl max-w-[80%] ${
-                  msg.role === "ai"
+                  msg.role === "assistant"
                     ? "bg-gray-800 border border-gray-700 text-gray-100"
                     : "bg-cyan-600 text-white ml-auto"
                 }`}

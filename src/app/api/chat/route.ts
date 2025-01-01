@@ -9,25 +9,32 @@ import { scrapeUrl, urlPattern } from "@/app/utils/scraper";
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const { message, messages } = await req.json();
 
-    //console.log("Message Received:", message);
+    console.log("Message Received:", message);
+    console.log("Messages:", messages);
+    
 
     const url = message.match(urlPattern);
 
     let scrapedContent = "";
 
     if (url) {
-      //console.log("URL Detected:", url);
-      const scraperResponse = await scrapeUrl(url);
-      //console.log("Scraped Content:", scraperResponse);
-      scrapedContent = scraperResponse.content;
+      console.log("URL Detected:", url);
+      const scraperResponse = await scrapeUrl(url[0]);
+      console.log("Scraped Content:", scraperResponse);
+      if (scraperResponse)
+      {
+        scrapedContent = scraperResponse.content;
+      }
     }
+    //console.log("here");
 
     //extract user query from message
     const userQuery = message.replace(url ? url[0] : "", "").trim();
+    console.log("here");
 
-    const prompt = `
+    const userPrompt = `
     Answer my question: "${userQuery}"
 
     Based on the following content:
@@ -35,10 +42,19 @@ export async function POST(req: Request) {
       ${scrapedContent}
     </content>
     `;
+    console.log("here");
+    //list of messages
+    const llmMessages = [
+      ...messages,
+      {
+        role: "user",
+        content: userPrompt,
+      }
+    ]
   
     //console.log("Prompt:", prompt);
 
-    const response = await getGroqResponse(message);
+    const response = await getGroqResponse(llmMessages);
 
     return NextResponse.json({ message: response });
   } catch (error) {
